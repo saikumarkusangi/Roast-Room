@@ -2,23 +2,18 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { ARENA_PERSONAS, type ArenaPersonaId } from "@/lib/arena";
+import { type ArenaPersonaId } from "@/lib/arena";
 
 type DialogueBannerProps = {
   speakerId: ArenaPersonaId | "founder" | null;
   text?: string;
-  /** Show text immediately (for live mic transcript — no restart glitch). */
   live?: boolean;
 };
 
 const TYPE_MS = 22;
 
 export function DialogueBanner({ speakerId, text, live = false }: DialogueBannerProps) {
-  const persona =
-    speakerId && speakerId !== "founder"
-      ? ARENA_PERSONAS.find((item) => item.id === speakerId)
-      : null;
-  const labelKey = speakerId === "founder" ? "founder" : persona?.id ?? "none";
+  const labelKey = speakerId ?? "none";
   const [typed, setTyped] = useState("");
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);

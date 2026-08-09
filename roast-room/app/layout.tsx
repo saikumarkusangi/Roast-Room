@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Roast Room — Live Startup Battle Show",
+  title: "Roast Room — Put Anything In The Arena",
   description:
-    "Enter the ring. Three judges roast your pitch live on stage. A scored verdict. Built for demos worth recording.",
+    "Get brutally honest feedback from AI experts. Choose an arena — Startup, Resume, Design, Marketing, Content, App — and survive the jury.",
 };
 
 export default function RootLayout({

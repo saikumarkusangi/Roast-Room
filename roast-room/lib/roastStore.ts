@@ -1,5 +1,11 @@
 import { EventEmitter } from "events";
-import { PERSONAS, FOUNDER_PROMPT, VERDICT_PROMPT, EMAIL_PROMPT } from "@/lib/personas";
+import {
+  getEmailPromptForArena,
+  getFounderPromptForArena,
+  getPersonasForArena,
+  getVerdictPromptForArena,
+} from "@/lib/arena_personas";
+import { getArena, type ArenaId } from "@/lib/arenas";
 import { callClaude, parseJsonLoose } from "@/lib/anthropic";
 import {
   buildSampleRoastSteps,
@@ -40,6 +46,7 @@ export interface Verdict {
 export interface RoastSession {
   id: string;
   pitch: string;
+  arenaId: ArenaId;
   status: "running" | "done" | "error";
   error?: string;
   messages: RoastMessage[];
@@ -52,11 +59,12 @@ export interface RoastSession {
 class RoastStore extends EventEmitter {
   sessions = new Map<string, RoastSession>();
 
-  create(pitch: string): RoastSession {
+  create(pitch: string, arenaId: ArenaId = "startup"): RoastSession {
     const id = Math.random().toString(36).slice(2, 9);
     const session: RoastSession = {
       id,
       pitch,
+      arenaId,
       status: "running",
       messages: [],
       createdAt: Date.now(),
@@ -87,7 +95,7 @@ class RoastStore extends EventEmitter {
   }
 
   private async orchestrateMock(session: RoastSession) {
-    const steps = buildSampleRoastSteps(session.pitch);
+    const steps = buildSampleRoastSteps(session.pitch, session.arenaId);
     for (const step of steps) {
       await wait(step.delayMs);
       if (step.kind === "message") {
@@ -111,7 +119,6 @@ class RoastStore extends EventEmitter {
     this.finish(session, "done");
   }
 
-  /** Runs the full debate sequentially, emitting an SSE event after each step. */
   async orchestrate(id: string) {
     const session = this.get(id);
     if (!session) return;
@@ -125,17 +132,18 @@ class RoastStore extends EventEmitter {
       return;
     }
 
+    const personas = getPersonasForArena(session.arenaId);
+    const founderPrompt = getFounderPromptForArena(session.arenaId);
+    const verdictPrompt = getVerdictPromptForArena(session.arenaId);
+    const emailPrompt = getEmailPromptForArena(session.arenaId);
+
     try {
       const transcript = () =>
-        session.messages
-          .map((m) => `${m.personaName}: ${m.body}`)
-          .join("\n\n");
+        session.messages.map((m) => `${m.personaName}: ${m.body}`).join("\n\n");
 
-      for (const persona of PERSONAS) {
-        const context = `PITCH:\n${session.pitch}\n\nDEBATE SO FAR:\n${transcript() || "(nothing said yet)"}`;
-        const body = await callClaude(persona.systemPrompt, [
-          { role: "user", content: context },
-        ]);
+      for (const persona of personas) {
+        const context = `SUBMISSION:\n${session.pitch}\n\nDEBATE SO FAR:\n${transcript() || "(nothing said yet)"}`;
+        const body = await callClaude(persona.systemPrompt, [{ role: "user", content: context }]);
         this.pushMessage(session, {
           phase: "roast",
           personaId: persona.id,
@@ -146,24 +154,20 @@ class RoastStore extends EventEmitter {
       }
 
       {
-        const context = `PITCH:\n${session.pitch}\n\nWHAT WAS SAID ABOUT IT:\n${transcript()}`;
-        const body = await callClaude(FOUNDER_PROMPT, [
-          { role: "user", content: context },
-        ]);
+        const context = `SUBMISSION:\n${session.pitch}\n\nWHAT WAS SAID:\n${transcript()}`;
+        const body = await callClaude(founderPrompt, [{ role: "user", content: context }]);
         this.pushMessage(session, {
           phase: "founder",
           personaId: "founder",
-          personaName: "The Founder",
+          personaName: getArena(session.arenaId).founderLabel,
           color: "var(--amber)",
           body,
         });
       }
 
-      for (const persona of PERSONAS) {
-        const context = `PITCH:\n${session.pitch}\n\nFULL DEBATE SO FAR:\n${transcript()}`;
-        const body = await callClaude(persona.rebuttalPrompt, [
-          { role: "user", content: context },
-        ]);
+      for (const persona of personas) {
+        const context = `SUBMISSION:\n${session.pitch}\n\nFULL DEBATE SO FAR:\n${transcript()}`;
+        const body = await callClaude(persona.rebuttalPrompt, [{ role: "user", content: context }]);
         this.pushMessage(session, {
           phase: "rebuttal",
           personaId: persona.id,
@@ -174,15 +178,15 @@ class RoastStore extends EventEmitter {
       }
 
       {
-        const context = `PITCH:\n${session.pitch}\n\nFULL DEBATE:\n${transcript()}`;
-        const raw = await callClaude(VERDICT_PROMPT, [{ role: "user", content: context }], 500);
+        const context = `SUBMISSION:\n${session.pitch}\n\nFULL DEBATE:\n${transcript()}`;
+        const raw = await callClaude(verdictPrompt, [{ role: "user", content: context }], 500);
         session.verdict = parseJsonLoose<Verdict>(raw);
         this.emit(`roast:${session.id}`, { type: "verdict", session });
       }
 
       {
-        const context = `PITCH:\n${session.pitch}\n\nFULL DEBATE:\n${transcript()}\n\nVERDICT: ${JSON.stringify(session.verdict)}`;
-        const email = await callClaude(EMAIL_PROMPT, [{ role: "user", content: context }], 300);
+        const context = `SUBMISSION:\n${session.pitch}\n\nFULL DEBATE:\n${transcript()}\n\nVERDICT: ${JSON.stringify(session.verdict)}`;
+        const email = await callClaude(emailPrompt, [{ role: "user", content: context }], 300);
         session.email = email;
         this.emit(`roast:${session.id}`, { type: "email", session });
       }

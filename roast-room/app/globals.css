@@ -84,10 +84,14 @@ html.arena-lock body {
 .stage-scene__image {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(7, 6, 10, 0.15) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.55) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.35) 0%, rgba(7, 6, 10, 0.08) 45%, rgba(7, 6, 10, 0.3) 100%), url("/arena-stage.png") center / cover no-repeat;
+    background:
+      linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 45%, rgba(7, 6, 10, 0.62) 100%),
+      linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 45%, rgba(7, 6, 10, 0.35) 100%),
+      var(--stage-bg, url("/arena-stage.png")) center / cover no-repeat;
     transform: scale(1.04);
     animation: stage-drift 28s ease-in-out infinite alternate;
     z-index: 0;
+    transition: opacity 0.45s ease;
 }
 
 .stage-scene__haze {

@@ -7,7 +7,8 @@ import { DialogueBanner } from "@/components/arena/DialogueBanner";
 import { FloatingReactions } from "@/components/arena/FloatingReactions";
 import { useRoastPlayback } from "@/hooks/use_roast_playback";
 import { useVoiceReply } from "@/hooks/use_voice_reply";
-import { ARENA_PERSONAS, type ArenaPersonaId } from "@/lib/arena";
+import { getArenaPersonas, type ArenaPersonaId } from "@/lib/arena";
+import { getArena } from "@/lib/arenas";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
 
@@ -16,14 +17,15 @@ type ArenaExperienceProps = {
   onReset: () => void;
 };
 
-const POV_BACKGROUNDS: Record<"stage" | ArenaPersonaId, string> = {
-  stage: "/arena-ring-bg.png",
-  vc: "/pov-investor.png",
-  competitor: "/pov-competitor.png",
-  user: "/pov-user.png",
-};
-
 export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
+  const arena = getArena(session.arenaId);
+  const arenaPersonas = getArenaPersonas(session.arenaId);
+  const povBackgrounds: Record<"stage" | ArenaPersonaId, string> = {
+    stage: arena.ringBg,
+    vc: session.arenaId === "startup" ? "/pov-investor.png" : arena.ringBg,
+    competitor: session.arenaId === "startup" ? "/pov-competitor.png" : arena.ringBg,
+    user: session.arenaId === "startup" ? "/pov-user.png" : arena.ringBg,
+  };
   const {
     visibleMessages,
     speakingIndex,
@@ -127,19 +129,19 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
   }
 
   const speakerName = (() => {
-    if (awaitingReply || activeSpeaker === "founder") return "The Founder";
+    if (awaitingReply || activeSpeaker === "founder") return arena.founderLabel;
     if (activeSpeaker === "vc" || activeSpeaker === "competitor" || activeSpeaker === "user") {
-      return ARENA_PERSONAS.find((item) => item.id === activeSpeaker)?.title ?? null;
+      return arenaPersonas.find((item) => item.id === activeSpeaker)?.title ?? null;
     }
     if (!introReady) return "Ringing In";
     if (canShowVerdict) return "Verdict";
-    return "On Air";
+    return arena.shortTitle;
   })();
 
   const speakerAccent = (() => {
     if (awaitingReply || activeSpeaker === "founder") return "var(--gold)";
     if (activeSpeaker === "vc" || activeSpeaker === "competitor" || activeSpeaker === "user") {
-      return ARENA_PERSONAS.find((item) => item.id === activeSpeaker)?.accent ?? "var(--cream)";
+      return arenaPersonas.find((item) => item.id === activeSpeaker)?.accent ?? "var(--cream)";
     }
     return "var(--text-dim)";
   })();
@@ -157,7 +159,7 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
           <motion.div
             key={povKey}
             className="arena-pov-bg absolute inset-0"
-            style={{ backgroundImage: `url(${POV_BACKGROUNDS[povKey]})` }}
+            style={{ backgroundImage: `url(${povBackgrounds[povKey]})` }}
             initial={{ opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1.02 }}
             exit={{ opacity: 0 }}
@@ -165,8 +167,7 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
           />
         </AnimatePresence>
         <div className="arena-ring-haze" />
-        <div className="spotlight-beam spotlight-beam--left" />
-        <div className="spotlight-beam spotlight-beam--right" />
+       
       </div>
 
       <FloatingReactions pulse={crowdPulse} />
@@ -226,7 +227,7 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
               speakerId={activeSpeaker}
               text={
                 awaitingReply && !draft
-                  ? "Hit the mic and defend your pitch."
+                  ? arena.defensePrompt
                   : dialogueText
               }
               live={awaitingReply && Boolean(draft)}

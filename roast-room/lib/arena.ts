@@ -1,39 +1,36 @@
+import { getArena, type ArenaId } from "@/lib/arenas";
+
 export type ArenaPhase = "landing" | "arena" | "verdict";
 
-export const ARENA_PERSONAS = [
-  {
-    id: "vc",
-    label: "Investor",
-    title: "The VC",
-    role: "Sees 40 pitches a week",
-    accent: "#e8b84a",
-    glow: "rgba(232, 184, 74, 0.55)",
-    image: "/persona-investor.png",
-    position: "left" as const,
-  },
-  {
-    id: "competitor",
-    label: "Competitor",
-    title: "The Rival",
-    role: "Already shipped this",
-    accent: "#e63228",
-    glow: "rgba(230, 50, 40, 0.55)",
-    image: "/persona-competitor.png",
-    position: "right" as const,
-  },
-  {
-    id: "user",
-    label: "Harsh User",
-    title: "Target Customer",
-    role: "Won't switch",
-    accent: "#6aa8ff",
-    glow: "rgba(106, 168, 255, 0.55)",
-    image: "/persona-user.png",
-    position: "bottom" as const,
-  },
-] as const;
+export type ArenaPersonaId = "vc" | "competitor" | "user";
 
-export type ArenaPersonaId = (typeof ARENA_PERSONAS)[number]["id"];
+/** UI personas for the active arena (display names + accents). */
+export function getArenaPersonas(arenaId?: ArenaId | string) {
+  const arena = getArena(arenaId);
+  return arena.judges.map((judge) => ({
+    id: judge.id,
+    label: judge.title,
+    title: judge.title,
+    role: judge.role,
+    accent: judge.accent,
+    glow: `${judge.accent}88`,
+    image:
+      judge.id === "vc"
+        ? "/persona-investor.png"
+        : judge.id === "competitor"
+          ? "/persona-competitor.png"
+          : "/persona-user.png",
+    position:
+      judge.id === "vc"
+        ? ("left" as const)
+        : judge.id === "competitor"
+          ? ("right" as const)
+          : ("bottom" as const),
+  }));
+}
+
+/** @deprecated Prefer getArenaPersonas(arenaId) */
+export const ARENA_PERSONAS = getArenaPersonas("startup");
 
 const BRAND_PATTERN = /^([A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+){0,2})\s*[-—–:]/;
 
@@ -49,7 +46,12 @@ export function extractStartupName(pitch: string): string {
   const dashSplit = cleaned.split(/\s+[—–-]\s+/);
   const head = dashSplit[0]?.trim() ?? "";
   const headWords = head.split(/\s+/);
-  if (headWords.length > 0 && headWords.length <= 3 && head.length <= 28 && !/^(book|build|we|our|an|a|the)\b/i.test(head)) {
+  if (
+    headWords.length > 0 &&
+    headWords.length <= 3 &&
+    head.length <= 28 &&
+    !/^(book|build|we|our|an|a|the)\b/i.test(head)
+  ) {
     return head.toUpperCase();
   }
 

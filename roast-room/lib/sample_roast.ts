@@ -1,3 +1,4 @@
+import { getArena, type ArenaId } from "@/lib/arenas";
 import type { Verdict } from "@/lib/roastStore";
 
 export type SampleStep =
@@ -21,72 +22,88 @@ export type SampleStep =
       delayMs: number;
     };
 
+export function isMockRoastEnabled(): boolean {
+  const flag = process.env.MOCK_ROAST?.trim().toLowerCase();
+  if (flag === "1" || flag === "true" || flag === "yes") return true;
+  if (flag === "0" || flag === "false" || flag === "no") return false;
+  return process.env.NODE_ENV === "development";
+}
+
+export function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /** Fixed script for local UI testing — no LLM calls. Client paces + TTS the lines. */
-export function buildSampleRoastSteps(pitch: string): SampleStep[] {
-  const snippet = pitch.trim().slice(0, 80) || "this idea";
+export function buildSampleRoastSteps(
+  pitch: string,
+  arenaId: ArenaId | string = "startup"
+): SampleStep[] {
+  const arena = getArena(arenaId);
+  const [j1, j2, j3] = arena.judges;
+  const snippet = pitch.trim().slice(0, 80) || "this submission";
   return [
     {
       kind: "message",
       phase: "roast",
-      personaId: "vc",
-      personaName: "The VC",
-      color: "var(--blue)",
+      personaId: j1.id,
+      personaName: j1.title,
+      color: j1.accent,
       delayMs: 350,
-      body: `I'm going to stop you at "${snippet}${pitch.length > 80 ? "…" : ""}". That's a feature dressed as a company. Where's the wedge, the why-now, and the path to a real TAM?`,
+      body: `I'm going to stop you at "${snippet}${pitch.length > 80 ? "…" : ""}". That's thin. Where's the proof, the wedge, and the reason anyone should care now?`,
     },
     {
       kind: "message",
       phase: "roast",
-      personaId: "competitor",
-      personaName: "The Competitor",
-      color: "var(--purple)",
+      personaId: j2.id,
+      personaName: j2.title,
+      color: j2.accent,
       delayMs: 350,
-      body: "We shipped a version of this three years ago. The VC is right about market size — and you're also missing the hard part: retention after the novelty dies.",
+      body: `We've seen this shape before. ${j1.title} is right about the weak spot — and you're also missing the hard part that actually decides winners.`,
     },
     {
       kind: "message",
       phase: "roast",
-      personaId: "user",
-      personaName: "The Harshest User",
-      color: "var(--green)",
+      personaId: j3.id,
+      personaName: j3.title,
+      color: j3.accent,
       delayMs: 350,
-      body: "I already bounce between three half-working tools for this. Unless you save me an hour in week one, I'm not switching — and nothing in that pitch promises that.",
+      body: `Unless you change something concrete for me in week one, I'm out — and nothing in that submission promises that.`,
     },
     {
       kind: "message",
       phase: "founder",
       personaId: "founder",
-      personaName: "The Founder",
+      personaName: arena.founderLabel,
       color: "var(--amber)",
       delayMs: 350,
-      body: "Fair on the feature risk — our wedge is the workflow we already described, not another dashboard. If we can't prove time saved in the first session, we don't deserve the install.",
+      body: `Fair on the risk — our wedge is what's already in the submission, not a new story. If we can't prove value fast, we don't deserve the yes.`,
     },
     {
       kind: "message",
       phase: "rebuttal",
-      personaId: "vc",
-      personaName: "The VC",
-      color: "var(--blue)",
+      personaId: j1.id,
+      personaName: j1.title,
+      color: j1.accent,
       delayMs: 300,
-      body: "Cute defense. Still waiting for the market that pays for 'workflow'.",
+      body: `Cute defense. Still waiting for the proof that pays.`,
     },
     {
       kind: "message",
       phase: "rebuttal",
-      personaId: "competitor",
-      personaName: "The Competitor",
-      color: "var(--purple)",
+      personaId: j2.id,
+      personaName: j2.title,
+      color: j2.accent,
       delayMs: 300,
-      body: "Prove retention and I'll stop yawning.",
+      body: `Prove the hard part — and I'll stop yawning.`,
     },
     {
       kind: "message",
       phase: "rebuttal",
-      personaId: "user",
-      personaName: "The Harshest User",
-      color: "var(--green)",
+      personaId: j3.id,
+      personaName: j3.title,
+      color: j3.accent,
       delayMs: 300,
-      body: "Talk is cheap. Show me the hour back.",
+      body: `Talk is cheap. Show me the change.`,
     },
     {
       kind: "verdict",
@@ -101,33 +118,22 @@ export function buildSampleRoastSteps(pitch: string): SampleStep[] {
           revenue_model: 4,
         },
         call: "KILL",
-        call_reason: "No clear wedge or distribution path beyond hoping users care.",
-        strength: "The founder at least owned the 'feature not a company' hit.",
-        weakness: "Nothing in the pitch proves why this wins the first week.",
-        verdict: "A neat demo idea wearing a Series A costume.",
+        call_reason: "No clear wedge or proof beyond hoping people care.",
+        strength: "At least owned the hardest hit.",
+        weakness: "Nothing proves why this wins the first week.",
+        verdict: "A neat idea wearing a finished product costume.",
       },
     },
     {
       kind: "email",
       delayMs: 300,
-      email: `Subject: Re: ${snippet.slice(0, 40) || "your pitch"}
+      email: `Subject: Re: ${snippet.slice(0, 40) || "your submission"}
 
-Thanks for sharing this. We're going to pass — the market looks crowded and we didn't see a sharp enough wedge or distribution plan to get excited at this stage.
+Thanks for sharing this. We're going to pass — we didn't see a sharp enough wedge or proof to get excited at this stage.
 
-Happy to reconnect if retention and a clearer wedge show up in the data.
+Happy to reconnect if clearer traction shows up.
 
 — Jordan`,
     },
   ];
-}
-
-export function isMockRoastEnabled(): boolean {
-  const flag = process.env.MOCK_ROAST?.trim().toLowerCase();
-  if (flag === "1" || flag === "true" || flag === "yes") return true;
-  if (flag === "0" || flag === "false" || flag === "no") return false;
-  return process.env.NODE_ENV === "development";
-}
-
-export function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
