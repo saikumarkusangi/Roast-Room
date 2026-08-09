@@ -84,10 +84,7 @@ html.arena-lock body {
 .stage-scene__image {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(180deg, rgba(7, 6, 10, 0.15) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.55) 100%),
-      linear-gradient(90deg, rgba(7, 6, 10, 0.35) 0%, rgba(7, 6, 10, 0.08) 45%, rgba(7, 6, 10, 0.3) 100%),
-      url("/arena-stage.png") center / cover no-repeat;
+    background: linear-gradient(180deg, rgba(7, 6, 10, 0.15) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.55) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.35) 0%, rgba(7, 6, 10, 0.08) 45%, rgba(7, 6, 10, 0.3) 100%), url("/arena-stage.png") center / cover no-repeat;
     transform: scale(1.04);
     animation: stage-drift 28s ease-in-out infinite alternate;
     z-index: 0;
@@ -120,10 +117,7 @@ html.arena-lock body {
 .arena-ring-bg {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 50%, rgba(7, 6, 10, 0.65) 100%),
-      linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 50%, rgba(7, 6, 10, 0.4) 100%),
-      url("/arena-ring-bg.png") center / cover no-repeat;
+    background: linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 50%, rgba(7, 6, 10, 0.65) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 50%, rgba(7, 6, 10, 0.4) 100%), url("/arena-ring-bg.png") center / cover no-repeat;
     transform: scale(1.03);
     animation: stage-drift 32s ease-in-out infinite alternate;
     z-index: 0;
@@ -143,18 +137,14 @@ html.arena-lock body {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(180deg, rgba(7, 6, 10, 0.18) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.72) 100%),
-      linear-gradient(90deg, rgba(7, 6, 10, 0.28) 0%, transparent 40%, transparent 60%, rgba(7, 6, 10, 0.28) 100%);
+    background: linear-gradient(180deg, rgba(7, 6, 10, 0.18) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.72) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.28) 0%, transparent 40%, transparent 60%, rgba(7, 6, 10, 0.28) 100%);
     pointer-events: none;
 }
 
 .arena-ring-haze {
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(ellipse 55% 40% at 50% 30%, rgba(230, 50, 40, 0.32), transparent 70%),
-      radial-gradient(ellipse 40% 30% at 50% 80%, rgba(0, 0, 0, 0.35), transparent 60%);
+    background: radial-gradient(ellipse 55% 40% at 50% 30%, rgba(230, 50, 40, 0.32), transparent 70%), radial-gradient(ellipse 40% 30% at 50% 80%, rgba(0, 0, 0, 0.35), transparent 60%);
     pointer-events: none;
     z-index: 1;
     animation: haze-breathe 8s ease-in-out infinite;
@@ -360,9 +350,7 @@ html.arena-lock body {
     border: 5px solid currentColor;
     border-radius: 10px;
     background: rgba(12, 10, 14, 0.55);
-    box-shadow:
-        inset 0 0 0 3px rgba(255, 255, 255, 0.08),
-        0 18px 48px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.08), 0 18px 48px rgba(0, 0, 0, 0.5);
     filter: drop-shadow(0 0 18px currentColor);
 }
 
