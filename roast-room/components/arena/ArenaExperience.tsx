@@ -6,6 +6,7 @@ import { VerdictOrb } from "@/components/arena/VerdictOrb";
 import { DialogueBanner } from "@/components/arena/DialogueBanner";
 import { FloatingReactions } from "@/components/arena/FloatingReactions";
 import { useRoastPlayback } from "@/hooks/use_roast_playback";
+import { useVoiceReply } from "@/hooks/use_voice_reply";
 import { type ArenaPersonaId } from "@/lib/arena";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
@@ -31,7 +32,19 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
     setMuted,
     introReady,
     crowdPulse,
+    awaitingReply,
+    submitFounderReply,
+    skipFounderReply,
   } = useRoastPlayback(session);
+  const {
+    isSupported,
+    isListening,
+    draft,
+    error: voiceError,
+    startListening,
+    stopListening,
+    clearDraft,
+  } = useVoiceReply();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -48,13 +61,21 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!awaitingReply) {
+      stopListening();
+      clearDraft();
+    }
+  }, [awaitingReply, stopListening, clearDraft]);
+
   const currentMessage =
     speakingIndex >= 0
-      ? session.messages[speakingIndex] ?? null
+      ? visibleMessages[speakingIndex] ?? session.messages[speakingIndex] ?? null
       : visibleMessages[visibleMessages.length - 1] ?? null;
 
   const activeSpeaker: ArenaPersonaId | "founder" | null = (() => {
     if (canShowVerdict) return null;
+    if (awaitingReply) return "founder";
     if (!currentMessage) return null;
     if (currentMessage.phase === "founder") return "founder";
     if (
@@ -73,7 +94,9 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
       : "stage";
 
   const dialogueText = useMemo(() => {
-    if (!currentMessage || canShowVerdict) return undefined;
+    if (canShowVerdict) return undefined;
+    if (awaitingReply) return draft || undefined;
+    if (!currentMessage) return undefined;
     if (
       currentMessage.phase === "roast" ||
       currentMessage.phase === "rebuttal" ||
@@ -82,12 +105,35 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
       return currentMessage.body;
     }
     return undefined;
-  }, [currentMessage, canShowVerdict]);
+  }, [awaitingReply, canShowVerdict, currentMessage, draft]);
 
   function handleReset() {
+    stopListening();
     cancelSpeech();
     onReset();
   }
+
+  function handleMicToggle() {
+    if (isListening) stopListening();
+    else startListening();
+  }
+
+  function handleSendReply() {
+    if (isListening) stopListening();
+    const text = draft.trim();
+    if (!text) return;
+    submitFounderReply(text);
+    clearDraft();
+  }
+
+  const statusLabel = (() => {
+    if (awaitingReply) return isListening ? "Your turn · Recording" : "Your turn · Reply";
+    if (!introReady) return "Bell";
+    if (speakingIndex >= 0) return "Speaking";
+    if (session.status === "running") return "On Air";
+    if (session.status === "done") return "Final";
+    return "Offline";
+  })();
 
   return (
     <motion.section
@@ -123,18 +169,10 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
         </div>
         <div className="flex items-center gap-3 font-poster uppercase text-[11px] tracking-[0.22em] text-[var(--text-dim)]">
           <span
-            className={`w-2 h-2 rounded-full ${session.status === "running" || speakingIndex >= 0 ? "live-dot bg-[var(--red)]" : "bg-white/30"}`}
+            className={`w-2 h-2 rounded-full ${session.status === "running" || speakingIndex >= 0 || awaitingReply ? "live-dot bg-[var(--red)]" : "bg-white/30"}`}
           />
           {session.mock ? "Mock · " : ""}
-          {!introReady
-            ? "Bell"
-            : speakingIndex >= 0
-              ? "Speaking"
-              : session.status === "running"
-                ? "On Air"
-                : session.status === "done"
-                  ? "Final"
-                  : "Offline"}
+          {statusLabel}
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -159,10 +197,68 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-30 pb-6 pt-16 px-4 sm:px-8 flex flex-col items-center justify-end pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 z-30 pb-6 pt-16 px-4 sm:px-8 flex flex-col items-center justify-end gap-5 pointer-events-none">
         {!canShowVerdict && (
           <div className="w-full pointer-events-auto">
-            <DialogueBanner speakerId={activeSpeaker} text={dialogueText} />
+            <DialogueBanner
+              speakerId={activeSpeaker}
+              text={
+                awaitingReply && !draft
+                  ? "Hit the mic and defend your pitch."
+                  : dialogueText
+              }
+              live={awaitingReply && Boolean(draft)}
+            />
+          </div>
+        )}
+
+        {awaitingReply && !canShowVerdict && (
+          <div className="pointer-events-auto flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={handleMicToggle}
+              disabled={!isSupported}
+              className={`relative inline-flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 transition-colors ${
+                isListening
+                  ? "border-[var(--red)] bg-[var(--red)] text-white"
+                  : "border-[var(--gold)] bg-black/50 text-[var(--gold)] hover:bg-black/70"
+              } disabled:opacity-40`}
+              aria-pressed={isListening}
+              aria-label={isListening ? "Stop recording reply" : "Record reply"}
+              title={isListening ? "Stop recording" : "Record your reply"}
+            >
+              {isListening && (
+                <span className="absolute inset-0 rounded-full border-2 border-[var(--red)] animate-ping opacity-40" />
+              )}
+              <MicIcon className="h-9 w-9 sm:h-11 sm:w-11 relative z-10" />
+            </button>
+            <p className="font-poster uppercase text-[11px] tracking-[0.22em] text-[var(--cream)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+              {isListening ? "Listening… tap to stop" : isSupported ? "Tap to reply" : "Voice not supported"}
+            </p>
+            {voiceError && (
+              <p className="font-mono-app text-xs text-[var(--red)]">{voiceError}</p>
+            )}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSendReply}
+                disabled={!draft.trim()}
+                className="btn-enter px-5 py-2.5 text-xl uppercase disabled:opacity-40"
+              >
+                Send Reply
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  stopListening();
+                  skipFounderReply();
+                  clearDraft();
+                }}
+                className="font-poster px-10 py-2.5 border border-white/15 bg-black/35 text-xl uppercase text-[var(--cream)] hover:border-[var(--red)]/50 hover:text-[var(--red)] hover:bg-black/55 transition-colors"
+              >
+                Skip
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -181,6 +277,20 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
         )}
       </AnimatePresence>
     </motion.section>
+  );
+}
+
+function MicIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="9" y="2" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

@@ -23,7 +23,7 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     title: "One defense",
-    body: "You get a founder rebuttal in the middle. Own the hits — or dig the hole deeper.",
+    body: "After the first round, grab the mic and reply live. Your words become the founder defense — or skip and use the house line.",
   },
   {
     title: "Stamp the verdict",
