@@ -7,6 +7,7 @@ import { ARENAS, getArena, type ArenaId } from "@/lib/arenas";
 import { playRingBell, unlockAudio } from "@/lib/ring_bell";
 import { startLobbyAmbience, stopLobbyAmbience } from "@/lib/lobby_ambience";
 import type { RoastSession } from "@/lib/roastStore";
+import Image from "next/image";
 
 const MAX_CHARS = 1500;
 
@@ -362,10 +363,9 @@ export default function HomePage() {
               <div className="spotlight-beam spotlight-beam--right" aria-hidden />
 
               <div className="stage-scene__content flex flex-col min-h-screen">
-                <header className="flex items-center justify-between gap-3 px-5 sm:px-8 lg:px-12 py-5">
+                <header className="flex items-start justify-between gap-3 px-5 sm:px-8 lg:px-12 py-5">
                   <div className="font-display text-3xl sm:text-5xl tracking-[0.08em]">
-                    <span className="text-[var(--red)]">ROAST</span>{" "}
-                    <span className="text-[var(--cream)]">ROOM</span>
+                   <Image src="/logo.png" alt="Roast Room" width={200} height={200} className="w-32 h-32" />
                   </div>
 
                   <span className="flex items-center gap-1 sm:gap-2">
@@ -393,9 +393,9 @@ export default function HomePage() {
                       Put anything in the arena
                     </p>
                     <h1 className="marquee-title font-display text-[clamp(3rem,11vw,6.5rem)] leading-[0.88] text-[var(--cream)] mb-4">
-                      YOUR IDEA.
+                      {selectedArena.heroLead}
                       <br />
-                      <span className="text-[var(--red)]">THEIR HONESTY.</span>
+                      <span className="text-[var(--red)]">{selectedArena.heroAccent}</span>
                     </h1>
                     <p className="text-[var(--text-dim)] text-base sm:text-lg max-w-lg leading-relaxed">
                       Get brutally honest feedback from AI experts. Pick a theme, submit, and survive the jury.

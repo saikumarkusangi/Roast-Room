@@ -23,6 +23,10 @@ export type ArenaDefinition = {
   shortTitle: string;
   emoji: string;
   tagline: string;
+  /** Landing hero line 1 (cream). */
+  heroLead: string;
+  /** Landing hero line 2 (red accent). */
+  heroAccent: string;
   submitHint: string;
   placeholder: string;
   landingBg: string;
@@ -40,6 +44,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "Startup",
     emoji: "🚀",
     tagline: "Investor. Competitor. Customer.",
+    heroLead: "YOUR IDEA.",
+    heroAccent: "THEIR HONESTY.",
     submitHint: "Drop your startup pitch",
     placeholder: "Type or record your startup pitch…",
     landingBg: ASSETS.arenaStage,
@@ -70,6 +76,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "Design",
     emoji: "🎨",
     tagline: "Senior Designer. Creative Director. End User.",
+    heroLead: "YOUR DESIGN.",
+    heroAccent: "THEIR CRITIQUE.",
     submitHint: "Describe the design or paste a critique brief",
     placeholder: "Describe your design, UI, or brand system…",
     landingBg: ASSETS.themeDesign,
@@ -95,6 +103,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "Resume",
     emoji: "💼",
     tagline: "Recruiter. Hiring Manager. ATS Bot.",
+    heroLead: "YOUR RESUME.",
+    heroAccent: "THEIR VERDICT.",
     submitHint: "Paste your resume summary",
     placeholder: "Paste resume bullets, summary, or LinkedIn About…",
     landingBg: ASSETS.themeResume,
@@ -120,6 +130,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "Marketing",
     emoji: "📢",
     tagline: "CMO. Competitor. Target Customer.",
+    heroLead: "YOUR COPY.",
+    heroAccent: "THEIR HONESTY.",
     submitHint: "Paste the ad, landing copy, or campaign",
     placeholder: "Paste your ad copy, landing page text, or campaign brief…",
     landingBg: ASSETS.themeMarketing,
@@ -145,6 +157,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "Content",
     emoji: "🎬",
     tagline: "Creator. Subscriber. Algorithm.",
+    heroLead: "YOUR CONTENT.",
+    heroAccent: "THEIR SCROLL.",
     submitHint: "Paste the script, hook, or title ideas",
     placeholder: "Paste your YouTube script, hook, or title…",
     landingBg: ASSETS.themeContent,
@@ -170,6 +184,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     shortTitle: "App",
     emoji: "📱",
     tagline: "Product Manager. Competitor. User.",
+    heroLead: "YOUR APP.",
+    heroAccent: "THEIR HONESTY.",
     submitHint: "Describe the app or feature",
     placeholder: "Describe your app, feature set, or onboarding flow…",
     landingBg: ASSETS.themeApp,

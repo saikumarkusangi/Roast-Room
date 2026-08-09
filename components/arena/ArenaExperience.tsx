@@ -12,6 +12,7 @@ import { getArena } from "@/lib/arenas";
 import { getArenaPov } from "@/lib/assets";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
+import Image from "next/image";
 
 type ArenaExperienceProps = {
   session: RoastSession;
@@ -177,10 +178,9 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
 
       <FloatingReactions pulse={crowdPulse} />
 
-      <div className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-5 sm:px-8 py-4">
+      <div className="absolute top-0 inset-x-0 z-30 flex items-start justify-between px-5 sm:px-8 py-4">
         <div className="font-display text-4xl tracking-[0.08em]">
-          <span className="text-[var(--red)]">ROAST</span>{" "}
-          <span className="text-[var(--cream)]">ROOM</span>
+          <Image src="/logo.png" alt="Roast Room" width={200} height={200} className="w-32 h-32" />
         </div>
         <div
           className="flex items-center gap-3 font-poster uppercase text-sm sm:text-base tracking-[0.2em]"
