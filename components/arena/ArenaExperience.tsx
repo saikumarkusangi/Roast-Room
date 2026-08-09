@@ -9,7 +9,7 @@ import { useRoastPlayback } from "@/hooks/use_roast_playback";
 import { useVoiceReply } from "@/hooks/use_voice_reply";
 import { getArenaPersonas, type ArenaPersonaId } from "@/lib/arena";
 import { getArena } from "@/lib/arenas";
-import { ASSETS } from "@/lib/assets";
+import { getArenaPov } from "@/lib/assets";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
 
@@ -21,11 +21,12 @@ type ArenaExperienceProps = {
 export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
   const arena = getArena(session.arenaId);
   const arenaPersonas = getArenaPersonas(session.arenaId);
-  const povBackgrounds: Record<"stage" | ArenaPersonaId, string> = {
+  const povBackgrounds: Record<"stage" | ArenaPersonaId | "founder", string> = {
     stage: arena.ringBg,
-    vc: session.arenaId === "startup" ? ASSETS.povInvestor : arena.ringBg,
-    competitor: session.arenaId === "startup" ? ASSETS.povCompetitor : arena.ringBg,
-    user: session.arenaId === "startup" ? ASSETS.povUser : arena.ringBg,
+    vc: getArenaPov(session.arenaId, "vc"),
+    competitor: getArenaPov(session.arenaId, "competitor"),
+    user: getArenaPov(session.arenaId, "user"),
+    founder: getArenaPov(session.arenaId, "founder"),
   };
   const {
     visibleMessages,
@@ -91,8 +92,11 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
     return null;
   })();
 
-  const povKey: "stage" | ArenaPersonaId =
-    activeSpeaker === "vc" || activeSpeaker === "competitor" || activeSpeaker === "user"
+  const povKey: "stage" | ArenaPersonaId | "founder" =
+    activeSpeaker === "vc" ||
+    activeSpeaker === "competitor" ||
+    activeSpeaker === "user" ||
+    activeSpeaker === "founder"
       ? activeSpeaker
       : "stage";
 
