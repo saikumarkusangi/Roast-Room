@@ -1,0 +1,14 @@
+zerops:
+  - setup: roastroom
+    build:
+      base: nodejs@22
+      buildCommands:
+        - npm install
+        - npm run build
+      deployFiles: ./
+    run:
+      base: nodejs@22
+      ports:
+        - port: 3000
+          httpSupport: true
+      start: npm run start

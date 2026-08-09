@@ -1,0 +1,437 @@
+@import "tailwindcss";
+:root {
+    --bg: #07060a;
+    --ink: #0a090c;
+    --panel: rgba(10, 9, 12, 0.72);
+    --panel-solid: #121018;
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #f4efe6;
+    --text-dim: #a89f93;
+    --text-faint: #6b645c;
+    --cream: #f0e6d4;
+    --gold: #e8b84a;
+    --amber: #f5a524;
+    --amber-dim: #6b4d16;
+    --red: #e63228;
+    --red-bright: #ff3a2f;
+    --red-dim: #5c1410;
+    --blue: #6aa8ff;
+    --blue-dim: #1e3358;
+    --green: #3dd68c;
+    --green-dim: #1c4a3a;
+    --ember: #e63228;
+    --ember-dim: #5c1410;
+    --vc: #ff9a4a;
+    --competitor: #e63228;
+    --user: #6aa8ff;
+    --font-display: "Bebas Neue", "Oswald", Impact, ui-sans-serif, sans-serif;
+    --font-poster: "Oswald", "Arial Narrow", ui-sans-serif, sans-serif;
+    --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    overflow-x: hidden;
+}
+
+html.arena-lock,
+html.arena-lock body {
+    overflow: hidden !important;
+    height: 100%;
+    overscroll-behavior: none;
+}
+
+.font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+}
+
+.font-poster {
+    font-family: var(--font-poster);
+}
+
+.font-mono-app {
+    font-family: var(--font-mono);
+}
+
+
+/* Stage atmosphere */
+
+.stage-scene {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--ink);
+}
+
+.stage-scene__image {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(7, 6, 10, 0.15) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.55) 100%),
+      linear-gradient(90deg, rgba(7, 6, 10, 0.35) 0%, rgba(7, 6, 10, 0.08) 45%, rgba(7, 6, 10, 0.3) 100%),
+      url("/arena-stage.png") center / cover no-repeat;
+    transform: scale(1.04);
+    animation: stage-drift 28s ease-in-out infinite alternate;
+    z-index: 0;
+}
+
+.stage-scene__haze {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 40% at 50% 35%, rgba(230, 50, 40, 0.28), transparent 70%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(232, 184, 74, 0.08), transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+    animation: haze-breathe 8s ease-in-out infinite;
+}
+
+.stage-scene__scan {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient( 0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px);
+    mix-blend-mode: multiply;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.stage-scene__content {
+    position: relative;
+    z-index: 3;
+}
+
+.arena-ring-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 50%, rgba(7, 6, 10, 0.65) 100%),
+      linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 50%, rgba(7, 6, 10, 0.4) 100%),
+      url("/arena-ring-bg.png") center / cover no-repeat;
+    transform: scale(1.03);
+    animation: stage-drift 32s ease-in-out infinite alternate;
+    z-index: 0;
+}
+
+.arena-pov-bg {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: #07060a;
+    /* soft vignette so dialogue stays readable */
+    box-shadow: inset 0 0 120px rgba(7, 6, 10, 0.55);
+    z-index: 0;
+}
+
+.arena-pov-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(7, 6, 10, 0.18) 0%, rgba(7, 6, 10, 0.28) 45%, rgba(7, 6, 10, 0.72) 100%),
+      linear-gradient(90deg, rgba(7, 6, 10, 0.28) 0%, transparent 40%, transparent 60%, rgba(7, 6, 10, 0.28) 100%);
+    pointer-events: none;
+}
+
+.arena-ring-haze {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 40% at 50% 30%, rgba(230, 50, 40, 0.32), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 50% 80%, rgba(0, 0, 0, 0.35), transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+    animation: haze-breathe 8s ease-in-out infinite;
+}
+
+@keyframes stage-drift {
+    from {
+        transform: scale(1.04) translate3d(0, 0, 0);
+    }
+    to {
+        transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+    }
+}
+
+@keyframes haze-breathe {
+    0%,
+    100% {
+        opacity: 0.85;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes marquee-flicker {
+    0%,
+    92%,
+    100% {
+        opacity: 1;
+    }
+    93% {
+        opacity: 0.72;
+    }
+    94% {
+        opacity: 1;
+    }
+    96% {
+        opacity: 0.55;
+    }
+    97% {
+        opacity: 1;
+    }
+}
+
+.marquee-title {
+    animation: marquee-flicker 6s step-end infinite;
+    text-shadow: 0 0 24px rgba(230, 50, 40, 0.35), 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+@keyframes spotlight-sweep-left {
+    0% {
+        transform: rotate(-8deg) translate3d(-2%, 0, 0);
+        opacity: 0.45;
+    }
+    100% {
+        transform: rotate(-2deg) translate3d(2%, 1%, 0);
+        opacity: 0.75;
+        -webkit-transform: rotate(-2deg) translate3d(2%, 1%, 0);
+        -moz-transform: rotate(-2deg) translate3d(2%, 1%, 0);
+        -ms-transform: rotate(-2deg) translate3d(2%, 1%, 0);
+        -o-transform: rotate(-2deg) translate3d(2%, 1%, 0);
+    }
+}
+
+@keyframes spotlight-sweep-right {
+    0% {
+        transform: scaleX(-1) rotate(-8deg) translate3d(-2%, 0, 0);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scaleX(-1) rotate(-2deg) translate3d(2%, 1%, 0);
+        opacity: 0.7;
+    }
+}
+
+.spotlight-beam {
+    position: absolute;
+    width: min(48vw, 200px);
+    height: min(95vh, 1100px);
+    pointer-events: none;
+    z-index: 2;
+    mix-blend-mode: screen;
+    /* soft red volumetric cone */
+    background: linear-gradient( 180deg, rgba(255, 120, 100, 0.38) 0%, rgba(230, 50, 40, 0.22) 28%, rgba(230, 50, 40, 0.1) 58%, rgba(230, 50, 40, 0.03) 82%, transparent 100%);
+    clip-path: polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%);
+    filter: blur(10px);
+    transform-origin: top center;
+}
+
+.spotlight-beam--left {
+    top: -12%;
+    left: 10%;
+    animation: spotlight-sweep-left 2s ease-in-out infinite alternate;
+    -webkit-animation: spotlight-sweep-left 2s ease-in-out infinite alternate;
+}
+
+.spotlight-beam--right {
+    top: -10%;
+    right: 10%;
+    left: auto;
+    animation: spotlight-sweep-right 2s ease-in-out infinite alternate;
+    animation-delay: -4s;
+    -webkit-animation: spotlight-sweep-right 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-dot {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.live-dot {
+    animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes blink-caret {
+    0%,
+    45% {
+        opacity: 1;
+    }
+    50%,
+    95% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.terminal-caret {
+    animation: blink-caret 1.1s step-end infinite;
+}
+
+@keyframes log-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.log-entry {
+    animation: log-in 0.4s ease-out;
+}
+
+@keyframes fighter-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.fighter-card {
+    animation: fighter-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.fighter-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.fighter-card:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.fighter-card:nth-child(3) {
+    animation-delay: 0.31s;
+}
+
+.jumbotron {
+    background: linear-gradient(160deg, rgba(18, 16, 24, 0.92), rgba(8, 7, 12, 0.95));
+    border: 1px solid rgba(230, 50, 40, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 60px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+}
+
+.mic-panel {
+    background: linear-gradient(180deg, rgba(20, 18, 26, 0.88), rgba(10, 9, 14, 0.94));
+    border: 1px solid rgba(240, 230, 212, 0.12);
+    backdrop-filter: blur(10px);
+}
+
+.stage-ring {
+    background: radial-gradient(circle at 50% 40%, rgba(90, 32, 32, 0.35), rgba(18, 10, 14, 0.55));
+}
+
+.verdict-stamp {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.35rem;
+    border: 5px solid currentColor;
+    border-radius: 10px;
+    background: rgba(12, 10, 14, 0.55);
+    box-shadow:
+        inset 0 0 0 3px rgba(255, 255, 255, 0.08),
+        0 18px 48px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0 0 18px currentColor);
+}
+
+.verdict-stamp__ink {
+    position: absolute;
+    inset: 5px;
+    border: 2px dashed currentColor;
+    border-radius: 6px;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.speech-orb {
+    background: linear-gradient(160deg, rgba(28, 18, 22, 0.72), rgba(14, 10, 14, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(10px);
+}
+
+.btn-enter {
+    background: var(--red-bright);
+    color: #fff;
+    font-family: var(--font-display);
+    letter-spacing: 0.12em;
+    transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-enter:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.01);
+    filter: brightness(1.08);
+}
+
+.btn-enter:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ticket-stub {
+    background: radial-gradient(circle at 0 50%, transparent 10px, var(--cream) 10.5px) left / 20px 20px repeat-y, radial-gradient(circle at 100% 50%, transparent 10px, var(--cream) 10.5px) right / 20px 20px repeat-y, var(--cream);
+    color: #1a1410;
+    clip-path: inset(0 10px 0 10px);
+}
+
+.rope-line {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #8b1a14 8%, #c4281f 50%, #8b1a14 92%, transparent);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+::selection {
+    background: var(--red-dim);
+    color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-dot,
+    .terminal-caret,
+    .log-entry,
+    .marquee-title,
+    .stage-scene__image,
+    .stage-scene__haze,
+    .arena-ring-bg,
+    .arena-ring-haze,
+    .spotlight-beam,
+    .fighter-card {
+        animation: none !important;
+    }
+    html {
+        scroll-behavior: auto;
+    }
+}
