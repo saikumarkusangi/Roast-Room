@@ -1,3 +1,5 @@
+import { ASSETS } from "@/lib/assets";
+
 export type ArenaId =
   | "startup"
   | "design"
@@ -40,8 +42,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "Investor. Competitor. Customer.",
     submitHint: "Drop your startup pitch",
     placeholder: "Type or record your startup pitch…",
-    landingBg: "/arena-stage.png",
-    ringBg: "/arena-ring-bg.png",
+    landingBg: ASSETS.arenaStage,
+    ringBg: ASSETS.arenaRingBg,
     founderLabel: "The Founder",
     defensePrompt: "Hit the mic and defend your pitch.",
     judges: [
@@ -70,8 +72,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "Senior Designer. Creative Director. End User.",
     submitHint: "Describe the design or paste a critique brief",
     placeholder: "Describe your design, UI, or brand system…",
-    landingBg: "/theme-design.png",
-    ringBg: "/theme-design.png",
+    landingBg: ASSETS.themeDesign,
+    ringBg: ASSETS.themeDesign,
     founderLabel: "The Designer",
     defensePrompt: "Hit the mic and defend your design.",
     judges: [
@@ -95,8 +97,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "Recruiter. Hiring Manager. ATS Bot.",
     submitHint: "Paste your resume summary",
     placeholder: "Paste resume bullets, summary, or LinkedIn About…",
-    landingBg: "/theme-resume.png",
-    ringBg: "/theme-resume.png",
+    landingBg: ASSETS.themeResume,
+    ringBg: ASSETS.themeResume,
     founderLabel: "The Candidate",
     defensePrompt: "Hit the mic and defend your experience.",
     judges: [
@@ -120,8 +122,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "CMO. Competitor. Target Customer.",
     submitHint: "Paste the ad, landing copy, or campaign",
     placeholder: "Paste your ad copy, landing page text, or campaign brief…",
-    landingBg: "/theme-marketing.png",
-    ringBg: "/theme-marketing.png",
+    landingBg: ASSETS.themeMarketing,
+    ringBg: ASSETS.themeMarketing,
     founderLabel: "The Marketer",
     defensePrompt: "Hit the mic and defend the campaign.",
     judges: [
@@ -145,8 +147,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "Creator. Subscriber. Algorithm.",
     submitHint: "Paste the script, hook, or title ideas",
     placeholder: "Paste your YouTube script, hook, or title…",
-    landingBg: "/theme-content.png",
-    ringBg: "/theme-content.png",
+    landingBg: ASSETS.themeContent,
+    ringBg: ASSETS.themeContent,
     founderLabel: "The Creator",
     defensePrompt: "Hit the mic and defend the content.",
     judges: [
@@ -170,8 +172,8 @@ export const ARENAS: readonly ArenaDefinition[] = [
     tagline: "Product Manager. Competitor. User.",
     submitHint: "Describe the app or feature",
     placeholder: "Describe your app, feature set, or onboarding flow…",
-    landingBg: "/theme-app.png",
-    ringBg: "/theme-app.png",
+    landingBg: ASSETS.themeApp,
+    ringBg: ASSETS.themeApp,
     founderLabel: "The Builder",
     defensePrompt: "Hit the mic and defend the product.",
     judges: [

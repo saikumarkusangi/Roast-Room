@@ -9,6 +9,7 @@ import { useRoastPlayback } from "@/hooks/use_roast_playback";
 import { useVoiceReply } from "@/hooks/use_voice_reply";
 import { getArenaPersonas, type ArenaPersonaId } from "@/lib/arena";
 import { getArena } from "@/lib/arenas";
+import { ASSETS } from "@/lib/assets";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
 
@@ -22,9 +23,9 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
   const arenaPersonas = getArenaPersonas(session.arenaId);
   const povBackgrounds: Record<"stage" | ArenaPersonaId, string> = {
     stage: arena.ringBg,
-    vc: session.arenaId === "startup" ? "/pov-investor.png" : arena.ringBg,
-    competitor: session.arenaId === "startup" ? "/pov-competitor.png" : arena.ringBg,
-    user: session.arenaId === "startup" ? "/pov-user.png" : arena.ringBg,
+    vc: session.arenaId === "startup" ? ASSETS.povInvestor : arena.ringBg,
+    competitor: session.arenaId === "startup" ? ASSETS.povCompetitor : arena.ringBg,
+    user: session.arenaId === "startup" ? ASSETS.povUser : arena.ringBg,
   };
   const {
     visibleMessages,
@@ -159,7 +160,7 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
           <motion.div
             key={povKey}
             className="arena-pov-bg absolute inset-0"
-            style={{ backgroundImage: `url(${povBackgrounds[povKey]})` }}
+            style={{ backgroundImage: `url("${povBackgrounds[povKey]}")` }}
             initial={{ opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1.02 }}
             exit={{ opacity: 0 }}

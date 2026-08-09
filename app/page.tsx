@@ -354,7 +354,7 @@ export default function HomePage() {
             <section className="stage-scene min-h-screen flex flex-col">
               <div
                 className="stage-scene__image"
-                style={{ ["--stage-bg" as string]: `url(${selectedArena.landingBg})` }}
+                style={{ ["--stage-bg" as string]: `url("${selectedArena.landingBg}")` }}
                 aria-hidden
               />
               <div className="stage-scene__haze" aria-hidden />
@@ -590,7 +590,7 @@ export default function HomePage() {
                       >
                         <div
                           className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-500 group-hover:scale-110"
-                          style={{ backgroundImage: `url(${arena.landingBg})` }}
+                          style={{ backgroundImage: `url("${arena.landingBg}")` }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20" />
                         <div className="relative z-10 flex h-full min-h-[180px] sm:min-h-[200px] flex-col justify-end p-5">

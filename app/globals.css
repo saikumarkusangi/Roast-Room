@@ -87,7 +87,7 @@ html.arena-lock body {
     background:
       linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 45%, rgba(7, 6, 10, 0.62) 100%),
       linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 45%, rgba(7, 6, 10, 0.35) 100%),
-      var(--stage-bg, url("/arena-stage.png")) center / cover no-repeat;
+      var(--stage-bg, url("https://res.cloudinary.com/drecccc2t/image/upload/v1786273563/arena-stage_kubqiy.png")) center / cover no-repeat;
     transform: scale(1.04);
     animation: stage-drift 28s ease-in-out infinite alternate;
     z-index: 0;
@@ -121,7 +121,7 @@ html.arena-lock body {
 .arena-ring-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 50%, rgba(7, 6, 10, 0.65) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 50%, rgba(7, 6, 10, 0.4) 100%), url("/arena-ring-bg.png") center / cover no-repeat;
+    background: linear-gradient(180deg, rgba(7, 6, 10, 0.2) 0%, rgba(7, 6, 10, 0.35) 50%, rgba(7, 6, 10, 0.65) 100%), linear-gradient(90deg, rgba(7, 6, 10, 0.4) 0%, rgba(7, 6, 10, 0.1) 50%, rgba(7, 6, 10, 0.4) 100%), url("https://res.cloudinary.com/drecccc2t/image/upload/v1786273561/arena-ring-bg_ksirjm.png") center / cover no-repeat;
     transform: scale(1.03);
     animation: stage-drift 32s ease-in-out infinite alternate;
     z-index: 0;
