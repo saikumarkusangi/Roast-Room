@@ -1,79 +1,139 @@
-# The Roast Room
+# Roast Room
 
-Paste a pitch. Three AI personas — a VC, a competitor, and your harshest target
-user — tear it apart live, one after another, each reacting to what the last one
-said. You get one shot to defend it as the founder. Then a scored verdict,
-a build-or-kill call, and a screenshot-ready investor rejection email.
+**Put anything in the arena.**
 
-Built for [The Zerops Challenge](https://www.wemakedevs.org/hackathons/zerops).
+Get brutally honest feedback from AI experts. Choose an arena — Startup, Resume, Design, Marketing, Content, or App — then three judges tear your submission apart live. Defend with your mic. Walk out with a scored verdict and an APPROVED / REJECTED stamp.
 
-## The flow
+Built for [The Zerops Challenge](https://www.wemakedevs.org/hackathons/zerops) (Aug 8–9, 2026) — idea to live app in one weekend on real infrastructure.
 
-1. **Round 1 — The Roast**: The VC, The Competitor, and The Harshest User each
-   attack the pitch in sequence, referencing specifics from the pitch and from
-   what the previous persona just said.
-2. **The Founder Fights Back**: one AI call defends the pitch using only what
-   was actually stated, pushing back on the weakest attack.
-3. **Final Word**: each of the three personas gets one short rebuttal line
-   reacting to the founder's defense.
-4. **Reality Check Scorecard**: a 6-axis score (market size, differentiation,
-   distribution, timing, defensibility, revenue model) plus a blunt BUILD or
-   KILL call.
-5. **Investor Rejection Email**: a short, specific, screenshot-worthy decline
-   email referencing the actual pitch.
+> *Your idea. Their honesty.*
 
-Nine sequential LLM calls per roast (via OpenRouter), each one seeing the
-growing transcript so the "debate" genuinely builds on itself — not nine
-independent prompts wearing different hats.
+## Why this for Zerops
+
+Zerops Challenge asks for a **working product with a live URL**, meaningfully deployed on Zerops — not a local demo. Roast Room is a full Next.js app:
+
+- Public SSR frontend + API routes on one Node service
+- Live arena stream over Server-Sent Events
+- Server-side LLM orchestration via OpenRouter
+- Deployed with the included `zerops.yaml` (build → run on port 3000)
+
+That maps cleanly to “frontend + API on Zerops” with a real public URL for judging.
+
+## Product
+
+### Arenas
+
+| Arena | Jury |
+| --- | --- |
+| **Startup** | Investor · Competitor · Customer |
+| **Design** | Senior Designer · Creative Director · End User |
+| **Resume** | Recruiter · Hiring Manager · ATS Bot |
+| **Marketing** | CMO · Competitor · Target Customer |
+| **Content** | Creator · Subscriber · Algorithm |
+| **App** | Product Manager · Competitor · User |
+
+### Flow
+
+1. **Headphones disclaimer** → soft lobby ambience  
+2. **Choose your arena** (theme picker)  
+3. **Submit** — type or record your pitch / resume / copy / script  
+4. **Enter the ring** — bell, cinematic POV cuts, floating crowd reactions  
+5. **Three experts debate** — sequential roasts that react to each other  
+6. **Your defense** — live mic reply (or skip)  
+7. **Verdict** — scorecard + APPROVED / REJECTED stamp  
+
+Universal loop: **Submit → 3 Experts Debate → Verdict → Fix It**
 
 ## Stack
 
-- Next.js 16 (App Router, TypeScript), Tailwind CSS 4
-- Server-Sent Events for the live terminal stream (same pattern proven in
-  earlier prototypes — no external pub/sub needed)
-- Server-side calls through `@openrouter/sdk`, orchestrated sequentially
-- In-memory session store (module-level Map + EventEmitter, pinned to
-  `globalThis`) — fine for a hackathon demo, swap for Postgres/Redis for
-  real persistence across restarts
+- **Next.js 16** (App Router, TypeScript) + Tailwind CSS 4 + Framer Motion  
+- **SSE** for live roast progress (`/api/roast/[id]/stream`)  
+- **OpenRouter** (`@openrouter/sdk`) for sequential debate calls  
+- In-memory session store (`globalThis` Map + EventEmitter) — fine for a hackathon demo  
+- Client TTS, reaction SFX, lobby ambience, ring bell  
 
 ## Run locally
 
 ```bash
 npm install
 cp .env.example .env
-# Edit .env — set OPENROUTER_API_KEY when you want live roasts
-# MOCK_ROAST=true (default in development) uses a sample script, no tokens
+# Set OPENROUTER_API_KEY for live roasts
+# MOCK_ROAST=true (default in development) = canned script, no tokens
 npm run dev
 ```
 
-Open http://localhost:3000, paste a pitch (or click "use an example"), and
-watch the roast run — takes about a minute end to end with live API, or a few
-seconds in mock mode.
+Open [http://localhost:3000](http://localhost:3000).
+
+| Env | Purpose |
+| --- | --- |
+| `OPENROUTER_API_KEY` | Live LLM roasts (required for production) |
+| `OPENROUTER_MODEL` | Optional model override |
+| `MOCK_ROAST` | `true` / `false` — mock script vs OpenRouter |
 
 ## Deploy to Zerops
 
-1. Create a Zerops project, add a Node.js service, connect this repo.
-2. `zerops.yaml` is included — builds with `npm install && npm run build`,
-   runs `npm run start` on port 3000.
-3. **Set `OPENROUTER_API_KEY` as an environment variable on the Zerops
-   service** — the app calls OpenRouter server-side and will error without
-   it (the error message tells you exactly this if it's missing).
-4. Zerops gives you a live URL once deployed.
+1. Create a Zerops project → Node.js service → connect this repo.  
+2. `zerops.yaml` builds with `npm install && npm run build`, runs `npm run start` on **port 3000**.  
+3. Set **`OPENROUTER_API_KEY`** (and `MOCK_ROAST=false`) as service env vars.  
+4. Ship — Zerops gives you a live URL.
 
-## Submission checklist
+```yaml
+# zerops.yaml (included)
+zerops:
+  - setup: roastroom
+    build:
+      base: nodejs@22
+      buildCommands:
+        - npm install
+        - npm run build
+      deployFiles: ./
+    run:
+      base: nodejs@22
+      ports:
+        - port: 3000
+          httpSupport: true
+      start: npm run start
+```
 
-- [ ] Deployed on Zerops with a live URL, `OPENROUTER_API_KEY` set
-- [ ] Repo public (or shared privately with judges)
-- [ ] Build post tagging @WeMakeDevs and @zeropsio, with:
-  - project name + what it does
-  - short demo video (paste a real pitch, let it roast, show the verdict
-    and rejection email — that's the whole video)
-  - link to the live deployment
-  - how Zerops is used
+## Zerops Challenge checklist
 
-## What's deliberately not in the MVP
+From [The Zerops Challenge](https://www.wemakedevs.org/hackathons/zerops) rules:
 
-Landing page roasts (URL input), Battle Mode (two pitches head to head), and
-"Make It Win" (pivot suggestions) were scoped out to ship reliably in the time
-available. The architecture supports all three as additional personas/calls
-in the same orchestration pattern if you want to extend it later.
+- [ ] Registered on WeMakeDevs  
+- [ ] Deployed on **Zerops** with a **live URL**  
+- [ ] `OPENROUTER_API_KEY` set; app stays up through judging  
+- [ ] Repo public (or shared with judges)  
+- [ ] **Build post** tagging **@WeMakeDevs** and **@zeropsio**, including:
+  - Project name + what it does  
+  - Short demo video (pick an arena → submit → roast → stamp)  
+  - Link to live deployment  
+  - How Zerops is used (Node service, `zerops.yaml`, env, public URL)  
+- [ ] Submit the form with repo, live URL, demo, and post  
+
+**AI-use:** AI can help you build — disclose tools used; show you understand the architecture.
+
+## How Zerops is used
+
+| Piece | Role |
+| --- | --- |
+| Node.js service | Hosts the Next.js app (SSR + API) |
+| `zerops.yaml` | Build, deploy files, start command, HTTP port |
+| Env vars | Secrets (`OPENROUTER_API_KEY`) and `MOCK_ROAST` |
+| Public URL | Reachable product for judges and demos |
+
+## Demo script (for your video)
+
+1. Headphones disclaimer → Continue  
+2. Choose **Resume** or **Startup**  
+3. Paste an example → **Enter The Ring**  
+4. Watch POV cuts + roast lines  
+5. Mic defense (or Skip)  
+6. Show **REJECTED** / **APPROVED** stamp + score  
+
+~60–90 seconds is enough.
+
+## What’s next (not in this weekend MVP)
+
+Custom jury builder, landing-page URL roast, LinkedIn/portfolio arenas, Battle Mode, and “Make It Win” pivots — same orchestration pattern, more arenas.
+
+---
