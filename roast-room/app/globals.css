@@ -363,6 +363,42 @@ html.arena-lock body {
     pointer-events: none;
 }
 
+.dialogue-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.dialogue-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.dialogue-scroll--fade-top {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 2.5rem, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 2.5rem, #000 100%);
+}
+
+.dialogue-scroll--fade-bottom {
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 2.5rem), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 2.5rem), transparent 100%);
+}
+
+.dialogue-scroll--fade-both {
+    -webkit-mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        #000 2.5rem,
+        #000 calc(100% - 2.5rem),
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        #000 2.5rem,
+        #000 calc(100% - 2.5rem),
+        transparent 100%
+    );
+}
+
 .speech-orb {
     background: linear-gradient(160deg, rgba(28, 18, 22, 0.72), rgba(14, 10, 14, 0.78));
     border: 1px solid rgba(255, 255, 255, 0.14);

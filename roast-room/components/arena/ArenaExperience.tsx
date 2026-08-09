@@ -7,7 +7,7 @@ import { DialogueBanner } from "@/components/arena/DialogueBanner";
 import { FloatingReactions } from "@/components/arena/FloatingReactions";
 import { useRoastPlayback } from "@/hooks/use_roast_playback";
 import { useVoiceReply } from "@/hooks/use_voice_reply";
-import { type ArenaPersonaId } from "@/lib/arena";
+import { ARENA_PERSONAS, type ArenaPersonaId } from "@/lib/arena";
 import { cancelSpeech } from "@/lib/speech";
 import type { RoastSession } from "@/lib/roastStore";
 
@@ -126,13 +126,22 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
     clearDraft();
   }
 
-  const statusLabel = (() => {
-    if (awaitingReply) return isListening ? "Your turn · Recording" : "Your turn · Reply";
-    if (!introReady) return "Bell";
-    if (speakingIndex >= 0) return "Speaking";
-    if (session.status === "running") return "On Air";
-    if (session.status === "done") return "Final";
-    return "Offline";
+  const speakerName = (() => {
+    if (awaitingReply || activeSpeaker === "founder") return "The Founder";
+    if (activeSpeaker === "vc" || activeSpeaker === "competitor" || activeSpeaker === "user") {
+      return ARENA_PERSONAS.find((item) => item.id === activeSpeaker)?.title ?? null;
+    }
+    if (!introReady) return "Ringing In";
+    if (canShowVerdict) return "Verdict";
+    return "On Air";
+  })();
+
+  const speakerAccent = (() => {
+    if (awaitingReply || activeSpeaker === "founder") return "var(--gold)";
+    if (activeSpeaker === "vc" || activeSpeaker === "competitor" || activeSpeaker === "user") {
+      return ARENA_PERSONAS.find((item) => item.id === activeSpeaker)?.accent ?? "var(--cream)";
+    }
+    return "var(--text-dim)";
   })();
 
   return (
@@ -167,12 +176,20 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
           <span className="text-[var(--red)]">ROAST</span>{" "}
           <span className="text-[var(--cream)]">ROOM</span>
         </div>
-        <div className="flex items-center gap-3 font-poster uppercase text-[11px] tracking-[0.22em] text-[var(--text-dim)]">
+        <div
+          className="flex items-center gap-3 font-poster uppercase text-sm sm:text-base tracking-[0.2em]"
+          style={{ color: speakerAccent }}
+        >
           <span
-            className={`w-2 h-2 rounded-full ${session.status === "running" || speakingIndex >= 0 || awaitingReply ? "live-dot bg-[var(--red)]" : "bg-white/30"}`}
+            className={`w-2 h-2 rounded-full ${session.status === "running" || speakingIndex >= 0 || awaitingReply ? "live-dot" : "opacity-40"}`}
+            style={{
+              backgroundColor:
+                session.status === "running" || speakingIndex >= 0 || awaitingReply
+                  ? "var(--red)"
+                  : "currentColor",
+            }}
           />
-          {session.mock ? "Mock · " : ""}
-          {statusLabel}
+          {speakerName}
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -197,9 +214,14 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-30 pb-6 pt-16 px-4 sm:px-8 flex flex-col items-center justify-end gap-5 pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 z-30 flex flex-col items-center justify-end pointer-events-none">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black via-black/70 to-transparent"
+          aria-hidden
+        />
+
         {!canShowVerdict && (
-          <div className="w-full pointer-events-auto">
+          <div className="relative w-full pointer-events-auto min-h-0 px-4 sm:px-8 pb-3">
             <DialogueBanner
               speakerId={activeSpeaker}
               text={
@@ -213,37 +235,41 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
         )}
 
         {awaitingReply && !canShowVerdict && (
-          <div className="pointer-events-auto flex flex-col items-center gap-3">
+          <div className="relative z-10 w-full pointer-events-auto flex flex-col items-center gap-3 px-4 pt-2 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:pb-8">
             <button
               type="button"
               onClick={handleMicToggle}
               disabled={!isSupported}
-              className={`relative inline-flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 transition-colors ${
+              className={`relative z-10 inline-flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-full border-2 shadow-[0_12px_40px_rgba(0,0,0,0.55)] transition-colors ${
                 isListening
-                  ? "border-[var(--red)] bg-[var(--red)] text-white"
-                  : "border-[var(--gold)] bg-black/50 text-[var(--gold)] hover:bg-black/70"
-              } disabled:opacity-40`}
+                  ? "border-white bg-[var(--red)] text-white"
+                  : "border-[var(--gold)] bg-[#16141c] text-[var(--gold)] hover:bg-[#1e1b26]"
+              } disabled:opacity-50`}
               aria-pressed={isListening}
               aria-label={isListening ? "Stop recording reply" : "Record reply"}
               title={isListening ? "Stop recording" : "Record your reply"}
             >
               {isListening && (
-                <span className="absolute inset-0 rounded-full border-2 border-[var(--red)] animate-ping opacity-40" />
+                <span className="absolute inset-[-6px] rounded-full border border-[var(--red)] animate-ping opacity-40" />
               )}
-              <MicIcon className="h-9 w-9 sm:h-11 sm:w-11 relative z-10" />
+              <MicIcon className="h-8 w-8 relative z-10" />
             </button>
-            <p className="font-poster uppercase text-[11px] tracking-[0.22em] text-[var(--cream)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-              {isListening ? "Listening… tap to stop" : isSupported ? "Tap to reply" : "Voice not supported"}
+            <p className="font-poster uppercase text-[11px] tracking-[0.22em] text-[var(--cream)]">
+              {isListening
+                ? "Listening… tap to stop"
+                : isSupported
+                  ? "Tap to reply"
+                  : "Voice not supported — use Skip"}
             </p>
             {voiceError && (
               <p className="font-mono-app text-xs text-[var(--red)]">{voiceError}</p>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-evenly gap-3 w-full max-w-md my-10">
               <button
                 type="button"
                 onClick={handleSendReply}
                 disabled={!draft.trim()}
-                className="btn-enter px-5 py-2.5 text-xl uppercase disabled:opacity-40"
+                className="btn-enter w-full px-5 py-3 text-base uppercase disabled:opacity-40"
               >
                 Send Reply
               </button>
@@ -254,7 +280,7 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
                   skipFounderReply();
                   clearDraft();
                 }}
-                className="font-poster px-10 py-2.5 border border-white/15 bg-black/35 text-xl uppercase text-[var(--cream)] hover:border-[var(--red)]/50 hover:text-[var(--red)] hover:bg-black/55 transition-colors"
+                className="font-poster w-full uppercase tracking-[0.14em] px-5 py-3 border border-white/20 bg-black/50 text-sm text-[var(--cream)] hover:border-white/40"
               >
                 Skip
               </button>
@@ -282,14 +308,9 @@ export function ArenaExperience({ session, onReset }: ArenaExperienceProps) {
 
 function MicIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="9" y="2" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2a3.5 3.5 0 0 0-3.5 3.5v6a3.5 3.5 0 1 0 7 0v-6A3.5 3.5 0 0 0 12 2Z" />
+      <path d="M6.5 11.5a1 1 0 1 0-2 0 7.5 7.5 0 0 0 6.5 7.43V21H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.07a7.5 7.5 0 0 0 6.5-7.43 1 1 0 1 0-2 0 5.5 5.5 0 0 1-11 0Z" />
     </svg>
   );
 }
